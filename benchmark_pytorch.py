@@ -63,11 +63,7 @@ if __name__ == "__main__":
     libs = [
         'stempeg',
         'ar_ffmpeg',
-        'aubio',
-        'pydub',
-        'soundfile',
-        'scipy',
-        'scipy_mmap',
+        'soundfile'
     ]
 
     if args.ext != "mp4":
