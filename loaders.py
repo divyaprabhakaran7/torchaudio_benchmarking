@@ -3,15 +3,13 @@ import audioread.rawread
 import audioread.ffdec
 import matplotlib.pyplot as plt
 import soundfile as sf
+import torch
 import aubio
 from pydub import AudioSegment
 import torchaudio
+from torchaudio.io import StreamReader
 import numpy as np
-#import tensorflow as tf
-#import tensorflow_io as tfio
 import librosa
-#import soxbindings
-#import sox
 import stempeg
 
 
@@ -19,9 +17,6 @@ import stempeg
 Some of the code taken from: 
 https://github.com/aubio/aubio/blob/master/python/demos/demo_reading_speed.py
 """
-
-
-
 
 # Guard TF imports
 try:
@@ -69,6 +64,22 @@ def load_torchaudio(fp):
     sig, rate = torchaudio.load(fp)
     return sig
 
+def load_torchaudio_streamreader(fp):
+    """
+    Decode audio via FFmpeg using torchaudio.io.StreamReader.
+    Returns a flat float32 numpy array of samples.
+    """
+    reader = StreamReader(src=fp)
+    reader.add_audio_stream(frames_per_chunk=2**20)
+    chunks = []
+    for frame in reader.stream():
+        # frame may be a Tensor or a tuple of (Tensor, metadata)
+        tensor = frame[0] if isinstance(frame, (list, tuple)) else frame
+        chunks.append(tensor)
+    if not chunks:
+        return np.array([], dtype=np.float32)
+    audio = torch.cat(chunks, dim=0)
+    return audio.numpy().flatten()
 
 def load_stempeg(fp):
     """
