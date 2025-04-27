@@ -63,8 +63,9 @@ if __name__ == "__main__":
     libs = [
         'stempeg',
         'ar_ffmpeg',
-        'soundfile'
     ]
+    torchaudio_backends = ['torchaudio-ffmpeg', 'torchaudio-streamreader']
+    libs.extend(torchaudio_backends)
 
     if args.ext != "mp4":
         libs.append('torchaudio-sox_io')
@@ -74,9 +75,12 @@ if __name__ == "__main__":
         print(f"\n===== Testing loader: {lib} =====")
         if "torchaudio" in lib:
             backend = lib.split("torchaudio-")[-1]
-            import torchaudio
-            torchaudio.set_audio_backend(backend)
-            call_fun = "load_torchaudio"
+            if backend == 'streamreader':
+               call_fun = 'load_torchaudio_streamreader'           
+            else:
+                import torchaudio
+                torchaudio.set_audio_backend(backend)
+                call_fun = "load_torchaudio"
         else:
             call_fun = 'load_' + lib
 
